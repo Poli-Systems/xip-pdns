@@ -63,9 +63,9 @@ log() {
 
 #
 # xip.io domain helpers
-# (^static\.)((?:[0-9]{1,3}\.){3}[0-9]{1,3})(\.ip)
+# (^static\.ip\.)((?:[0-9]{1,3}\.){3}[0-9]{1,3})(\.ip)
 XIP_DOMAIN_PATTERN="(^|\.)${XIP_DOMAIN//./\.}\$"
-REV_SUBDOMAIN_PATTERN="(^static\.)(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(\.ip)\$"
+REV_SUBDOMAIN_PATTERN="(^static\.)(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(\.clients)\$"
 NS_SUBDOMAIN_PATTERN="^ns-([0-9]+)\$"
 IP_SUBDOMAIN_PATTERN="(^|\.)(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\$"
 BASE36_SUBDOMAIN_PATTERN="(^|\.)([a-z0-9]{1,7})\$"
@@ -137,6 +137,14 @@ answer_ns_query() {
   done
 }
 
+answer_mx_query() {
+  local address
+  for address in "${XIP_ROOT_ADDRESSES[@]}"; do
+    send_answer "MX" "20" "blizzard-relay.mxrouting.net"
+  done
+
+}
+
 answer_root_a_query() {
   local address
   for address in "${XIP_ROOT_ADDRESSES[@]}"; do
@@ -164,7 +172,7 @@ while read_query; do
   log "Query: type=$TYPE qname=$QNAME qclass=$QCLASS qtype=$QTYPE id=$ID ip=$IP"
 
   if qname_matches_domain; then
-    
+
     if qname_is_root_domain; then
       if qtype_is "SOA"; then
         answer_soa_query
@@ -176,6 +184,10 @@ while read_query; do
 
       if qtype_is "A"; then
         answer_root_a_query
+      fi
+
+      if qtype_is "MX"; then
+        answer_mx_query
       fi
 
     elif qtype_is "A"; then
