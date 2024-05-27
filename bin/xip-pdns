@@ -6,7 +6,7 @@ shopt -s nocasematch
 #
 XIP_DOMAIN="polisystems.cloud"
 XIP_ROOT_ADDRESSES=( "116.203.149.108" )
-XIP_NS_ADDRESSES=( "116.203.149.108" "168.119.4.163" )
+XIP_NS_ADDRESSES=( "116.203.149.108" "116.203.149.108" )
 XIP_TIMESTAMP="0"
 XIP_TTL=300
 
@@ -125,16 +125,11 @@ resolve_base36_subdomain() {
 }
 
 answer_soa_query() {
-  send_answer "SOA" "admin.$XIP_DOMAIN ns-1.$XIP_DOMAIN $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
+  send_answer "SOA" "ns1.pdns.poli.network abuse@polisystems.ch $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
 }
 
 answer_ns_query() {
-  local i=1
-  local ns_address
-  for ns_address in "${XIP_NS_ADDRESSES[@]}"; do
-    send_answer "NS" "ns-$i.$XIP_DOMAIN"
-    let i+=1
-  done
+    send_answer "NS" "ns1.pdns.poli.network"
 }
 
 answer_mx_query() {
